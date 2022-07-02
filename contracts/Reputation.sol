@@ -7,18 +7,14 @@ import "./inherited/IERC4974.sol";
 /// @title PRNTS Reputation System
 contract Reputation is IERC4974 {
 
+    struct Participant {
+        bool isParticipating;
+        uint256 tokenBalance;
+    }
+    mapping(address => Participant) public participants;
     address operator;
     address mintAddress = 0x0000000000000000000000000000000000000000; 
     uint256 totalTokens;
-
-    mapping(address => bool) participating;
-    mapping(address => uint256) participantBalance;
-    // should we do a struct instead?
-    /*struct Participant {
-        address participant;
-        bool participating;
-        uint256 balance;
-    }*/
 
     constructor() {
         operator = msg.sender;
@@ -54,10 +50,10 @@ contract Reputation is IERC4974 {
         ///  MUST throw if `participant` is `operator` or zero address.
         require(_participant != operator, "Operator cannot be a participant.");
 
-        require(participating[_participant] != _participation, "Contract call did not change participant status.");
+        require(participants[_participant].isParticipating != _participation, "Contract call did not change participant status.");
 
-        // Interesting behavior: if not set to "true", defaults to "false"
-        participating[_participant] = _participation;
+        // Interesting behavior: if not set to "true" in contract call, defaults to "false"
+        participants[_participant].isParticipating = _participation;
 
         // QUESTION: do we want to remove tokens from a participant if they opt out of participating? 
         // Or leave their tokens in case they want to opt back in later? 
@@ -66,7 +62,7 @@ contract Reputation is IERC4974 {
     }
 
     function getParticipantStatus(address _participant) view public returns(bool) {
-        return participating[_participant];
+        return participants[_participant].isParticipating;
     }
 
     function transfer(address _from, address _to, uint256 _amount) public {
@@ -74,14 +70,14 @@ contract Reputation is IERC4974 {
         /// @dev MUST throw unless `msg.sender` is `operator`.
         require(msg.sender == operator, "Only the operator can transfer tokens.");
 
-        ///  MUST throw unless `to` address is participating.
-        require(participating[_to] == true, "Address is not a participant.");
+        ///  SHOULD throw if `amount` is zero.
+        require(_amount > 0, "Must transfer a non-zero amount.");
 
         ///  MUST throw if `to` and `from` are the same address.
         require(_from != _to, "Cannot transfer to self.");
-        
-        ///  SHOULD throw if `amount` is zero.
-        require(_amount > 0, "Must transfer a non-zero amount.");
+
+        ///  MUST throw unless `to` address is participating.
+        require(participants[_to].isParticipating == true, "Address is not a participant.");
 
         ///  MAY allow minting from zero address, burning to the zero address, 
         ///  transferring between accounts, and transferring between contracts.
