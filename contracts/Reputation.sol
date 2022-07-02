@@ -6,21 +6,26 @@ import "./inherited/IERC4974.sol";
 
 /// @title PRNTS Reputation System
 contract Reputation is IERC4974 {
-    
+
     address operator;
+    constructor() {
+        operator = msg.sender;
+   }
 
     function setOperator(address _operator) public {
         ///  @dev EIP-4974 designates that the function: 
-        ///  MUST throw if `operator` address is either already current `operator`
+        ///  MUST throw unless `msg.sender` is `operator`.
+        require(operator == msg.sender, "Only the current Operator can call setOperator.");
+        
+        ///  @dev MUST throw if `operator` address is either already current `operator`
         ///  or is the zero address.
-        require(operator != _operator, "Address is already the current operator.");
-        
-        operator = _operator;
+        require(_operator != operator, "Address is already the current operator.");
 
-        /// @dev MUST throw unless `msg.sender` is `operator`.
-        require(_operator == msg.sender, "Operator must be msg.sender.");
+        operator = _operator;     
+    }
 
-        
+    function getOperator() view public returns(address) {
+        return operator;
     }
 
     function setParticipation(address _participant, bool _participation) public {
