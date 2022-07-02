@@ -13,7 +13,7 @@ contract Reputation is IERC4974 {
     }
     mapping(address => Participant) public participants;
     address operator;
-    address mintAddress = 0x0000000000000000000000000000000000000000; 
+    address zeroAddress = 0x0000000000000000000000000000000000000000; 
     uint256 totalTokens;
 
     constructor(uint256 _initialSupply) {
@@ -29,7 +29,7 @@ contract Reputation is IERC4974 {
         ///  @dev MUST throw if `operator` address is either already current `operator`
         ///  or is the zero address.
         require(_operator != operator, "Address is already the current operator.");
-        require(_operator != mintAddress, "Operator cannot be the zero address.");
+        require(_operator != zeroAddress, "Operator cannot be the zero address.");
 
         operator = _operator;
 
@@ -51,24 +51,21 @@ contract Reputation is IERC4974 {
         
         ///  MUST throw if `participant` is `operator` or zero address.
         require(_participant != operator, "Operator cannot be a participant.");
+        require(_participant != zeroAddress, "Operator cannot be the zero address.");
 
         require(participants[_participant].isParticipating != _participation, "Contract call did not change participant status.");
 
         // Interesting behavior: if not set to "true" in contract call, defaults to "false"
         participants[_participant].isParticipating = _participation;
 
-        // QUESTION: do we want to remove tokens from a participant if they opt out of participating? 
-        // Or leave their tokens in case they want to opt back in later? 
-
         emit Participation(_participant, _participation);
-    }
-
-    function getParticipantStatus(address _participant) view public returns(bool) {
-        return participants[_participant].isParticipating;
     }
 
     function transfer(address _from, address _to, uint256 _amount) public {
         /// @notice Transfer EXP from one address to a participating address.
+        /// @param _from Address from which to transfer EXP tokens.
+        /// @param _to Address to which EXP tokens at `from` address will transfer.
+        /// @param _amount Total EXP tokens to reallocate.
         /// @dev MUST throw unless `msg.sender` is `operator`.
         require(msg.sender == operator, "Only the operator can transfer tokens.");
 
@@ -83,13 +80,15 @@ contract Reputation is IERC4974 {
 
         ///  MAY allow minting from zero address, burning to the zero address, 
         ///  transferring between accounts, and transferring between contracts.
-        ///  MAY limit interaction with non-participating `from` addresses.
-        /// @param _from Address from which to transfer EXP tokens.
-        /// @param _to Address to which EXP tokens at `from` address will transfer.
-        /// @param _amount Total EXP tokens to reallocate.
+        participants[_to].tokenBalance += _amount;
+        totalTokens -= _amount;
 
         ///  MUST emit a Transfer event with each successful call.
         emit Transfer(_from, _to, _amount);
+    }
+
+    function getParticipantStatus(address _participant) view public returns(bool) {
+        return participants[_participant].isParticipating;
     }
 
     function totalSupply() public view returns (uint256) {
@@ -97,6 +96,6 @@ contract Reputation is IERC4974 {
     }
 
     function balanceOf(address _participant) public view returns (uint256) {
-        
+        return participants[_participant].tokenBalance;
     }
 }
