@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.8; // 0.8.8 removes the requirement to add "override" to functions implementing an interface
 
-import "./inherited/IERC4974.sol";
+import "../interfaces/IERC4974.sol";
 
 /// @title PRNTS Reputation System
 contract Reputation is IERC4974 {
@@ -16,8 +16,9 @@ contract Reputation is IERC4974 {
     address mintAddress = 0x0000000000000000000000000000000000000000; 
     uint256 totalTokens;
 
-    constructor() {
+    constructor(uint256 _initialSupply) {
         operator = msg.sender;
+        totalTokens = _initialSupply;
    }
 
     function setOperator(address _operator) public {
@@ -28,6 +29,7 @@ contract Reputation is IERC4974 {
         ///  @dev MUST throw if `operator` address is either already current `operator`
         ///  or is the zero address.
         require(_operator != operator, "Address is already the current operator.");
+        require(_operator != mintAddress, "Operator cannot be the zero address.");
 
         operator = _operator;
 
