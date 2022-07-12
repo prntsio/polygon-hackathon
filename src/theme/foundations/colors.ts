@@ -33,34 +33,7 @@ export const colors: Colors = {
   },
 
   green: {
-    main: "#03C5B9",
-    light: "#03C58922",
-  },
-  blue: {
-    main: "#1A48E4",
-    light: "#1A48E422",
-  },
-  red: {
-    main: "#F7592A",
-    light: "#F7592A22",
-  },
-  yellow: {
-    main: "#FEBF12",
-    light: "#FEBF1222",
-  },
-  pink: {
-    main: "#FF89B9",
-    light: "#FF89B922",
-  },
-
-  choice: {
-    0: "#000E40",
-    1: "#000E40",
-    2: "#000E40",
-    3: "#000E40"
-  },
-  star: {
-    on: "#FEBF12",  // yellow.main
-    off: "transparent",
+    main: "#1DB954",
+    light: "#1DB95422",
   }
 }

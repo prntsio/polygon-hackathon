@@ -18,6 +18,7 @@
     "axios": "^0.23.0",
     "axios-case-converter": "^0.9.0",
     "dayjs": "^1.10.7",
+    "ethers": "^5.6.9",
     "framer-motion": "^4.1.17",
     "fs": "^0.0.1-security",
     "next": "11.1.2",
@@ -27,6 +28,7 @@
     "react-icons": "^4.3.1",
     "swr": "^1.0.1",
     "use-intersection": "^0.2.1",
+    "wagmi": "^0.5.9",
     "web3": "^1.7.0"
   },
   "devDependencies": {
