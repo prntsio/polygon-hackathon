@@ -8,17 +8,15 @@ import {
   Link,
   InputGroup,
   InputLeftElement,
-  Spacer,
 } from "@chakra-ui/react";
 import { FaSearch } from "react-icons/fa";
-import useSWR from "swr";
 import NextLink from "next/link";
 import { useAccount } from "wagmi";
 
 type Props = {};
 
 export const Header: React.FC<Props> = ({}) => {
-  const { address, isConnected } = useAccount();
+  const { address, isConnected } = useAccount(); 
 
   return (
     <Flex
