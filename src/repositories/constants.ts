@@ -1,0 +1,1 @@
+export const appId = '0xC5623EeFA1f097b47be8A5Da6f229A51B1c72D44';

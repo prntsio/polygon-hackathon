@@ -14,8 +14,6 @@ import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { login, generateChallenge } from "../repositories/login";
 import { getProfileByAddressRequest } from "../repositories/get-profiles";
-import { getPublications } from "../repositories/explore-publication";
-import { ExplorePublicationRequest, PublicationSortCriteria } from "../generated/types";
 
 const LoginPage: NextPage = () => {
   const { isConnected } = useAccount();
@@ -37,11 +35,6 @@ const LoginPage: NextPage = () => {
   }
 
   useEffect(() => {
-    const hoge: ExplorePublicationRequest = {
-      sources: ["0xC5623EeFA1f097b47be8A5Da6f229A51B1c72D44"],
-      sortCriteria: PublicationSortCriteria.TopCollected,
-    }
-    getPublications(hoge)
     getProfileByAddressRequest("0x886Aa330E54Fba39e342111455B1923CEd05B01D");
   }, []);
 

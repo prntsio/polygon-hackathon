@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from 'react-query';
 import { gql } from '@apollo/client/core';
 import { apolloClient } from "../utils/apolloClient"
-import { PublicationTypes, ExplorePublicationRequest, ExplorePublicationResult, PublicationSortCriteria } from "../generated/types"
+import { PublicationTypes, ExplorePublicationRequest, ExplorePublicationResult, PublicationSortCriteria, Post } from "../generated/types"
 
 const getPublicationsRequest = (request: ExplorePublicationRequest) => {
     return apolloClient.query({
@@ -13,11 +13,9 @@ const getPublicationsRequest = (request: ExplorePublicationRequest) => {
   };
 
   export const getPublications
- = async (request: ExplorePublicationRequest): Promise<ExplorePublicationResult> => {
+ = async (request: ExplorePublicationRequest): Promise<any> => {
   const result = await getPublicationsRequest(request);
-  console.log('publications: result', result.data);
-
-  return result.data;
+  return result.data.explorePublications;
 };
 
 export const EXPLORE_PUBLICATIONS = `
