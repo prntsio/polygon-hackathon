@@ -1,55 +1,50 @@
-from brownie import accounts
+from brownie import accounts as acct, ZERO_ADDRESS
+import pytest
 from scripts.deploy_reputation import deploy_reputation
 
-def test_reputation_deployment():
-     
+@pytest.fixture(scope="module")
+def reputation():
     # Arrange
     ## Initial variables
-    operator_address = accounts[0] # Deploys contract, sends tokens
-    user_1_address = accounts[1] # Non-participating address
-    user_2_address = accounts[2] # Participating address
-    total_supply = 1000
+    total_supply = 100000
 
-    ## Deploy required contracts
-    reputation_contract = deploy_reputation(total_supply, operator_address)
+    ## Deploy required contract
+    return deploy_reputation(total_supply, acct[0])
 
-    # Act 
-    ## Read initial supply from token contracts
-    reputation_token_total_supply = reputation_contract.totalSupply({"from": operator_address})
+def test_get_token_total_supply(reputation):
+    assert reputation.totalSupply({"from": acct[0]}) == 100000, "Reputation token's total supply is wrong"
 
-    ## Set users' participation status
-    user_address_not_participating = reputation_contract.getParticipantStatus(user_1_address, {"from": user_1_address})
-    reputation_contract.setParticipation(user_2_address, True, {"from": user_2_address})
-    user_address_participating = reputation_contract.getParticipantStatus(user_2_address, {"from": user_2_address})
+def test_set_operator(reputation):
+    reputation.setOperator(acct[1], {"from": acct[0]}) 
+    assert reputation.getOperator({"from": acct[0]}) == acct[1], "Operator address failed to change to new address"
 
-    ## Transfer 
+def test_set_participation(reputation):
+    reputation.setParticipation(acct[2], True, {"from": acct[2]})
+    assert reputation.getParticipantStatus(acct[2]) == True, "Participant user is not set as participating"
 
-    # Assert
-    assert reputation_token_total_supply == total_supply, "Reputation token's total supply is wrong"
-    assert user_address_not_participating == False, "Non-participating address is participating"
-    assert user_address_participating == True, "Participant address is not participating"
-    return reputation_contract
+def test_participating_user_transfer(reputation):
+    reputation.transfer(acct[1], acct[2], 100, {"from": acct[1]})
+    assert reputation.balanceOf(acct[2]) == 100, "Participant user does not have transferred tokens"
 
-def test_set_operator():
-    pass 
+'''def test_non_participating_user_transfer(reputation):
+    reputation.transfer(acct[1], acct[3], 100, {"from": acct[1]})
+    # We want this one to revert
+    '''
 
-def test_reputation_token_initial_supply():
-    pass 
+def test_total_supply_after_transfer(reputation):
+    assert reputation.totalSupply() == 99900, "Total supply has not been updated correctly after transfer to user"
 
-def test_set_participation():
-    pass 
+def test_burn_tokens(reputation):
+    '''
+    Have a bit of a conundrum here; cannot transfer back to the contract or the zero address, because neither are a 
+    participant, but neither can be marked as a participant either. 
+    Solutions:
+    - Dedicated burn() function
+    - Proxy address to hold tokens that have been taken away
 
-def test_non_participating_user_transfer():
-    pass 
-
-def test_participating_user_transfer():
-    pass 
-
-def test_total_supply_after_transfer():
-    pass 
-
-def test_transfer_tokens_back_to_contract():
-    pass 
-
-
-    
+    Proxy feels like the quick fix, dedicated burn() feels better
+    If I add a burn() a mint() probably also makes sense, but need to consider the consequences - 
+    - If a certain user has a large amount of tokens, more supply can be minted to drown them out 
+    '''
+    reputation.transfer(acct[2], ZERO_ADDRESS, 100, {"from": acct[1]})
+    assert reputation.balanceOf(acct[2]) == 0, "Participant user still has transferred tokens"
