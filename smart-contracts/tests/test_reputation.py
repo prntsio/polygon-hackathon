@@ -1,7 +1,7 @@
 from brownie import accounts
 from scripts.deploy_reputation import deploy_reputation
 
-def test_reputation():
+def test_reputation_deployment():
      
     # Arrange
     ## Initial variables
@@ -28,8 +28,28 @@ def test_reputation():
     assert reputation_token_total_supply == total_supply, "Reputation token's total supply is wrong"
     assert user_address_not_participating == False, "Non-participating address is participating"
     assert user_address_participating == True, "Participant address is not participating"
+    return reputation_contract
 
+def test_set_operator():
+    pass 
 
+def test_reputation_token_initial_supply():
+    pass 
+
+def test_set_participation():
+    pass 
+
+def test_non_participating_user_transfer():
+    pass 
+
+def test_participating_user_transfer():
+    pass 
+
+def test_total_supply_after_transfer():
+    pass 
+
+def test_transfer_tokens_back_to_contract():
+    pass 
 
 
     
