@@ -1,6 +1,6 @@
 // SPDX-License-Identifier: CC0
 
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.8;
 
 /// @title ERC-4974 Experience (EXP) Token Standard
 /// @dev See https://eips.ethereum.org/EIPS/EIP-4974

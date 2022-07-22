@@ -13,7 +13,7 @@ contract Reputation is IERC4974 {
     }
     mapping(address => Participant) public participants;
     address operator;
-    address zeroAddress = 0x0000000000000000000000000000000000000000; 
+    address constant ZERO_ADDRESS = address(0); 
     uint256 totalTokens;
 
     constructor(uint256 _initialSupply) {
@@ -21,7 +21,7 @@ contract Reputation is IERC4974 {
         totalTokens = _initialSupply;
    }
 
-    function setOperator(address _operator) public {
+    function setOperator(address _operator) external {
         ///  @dev EIP-4974 designates that the function: 
         ///  MUST throw unless `msg.sender` is `operator`.
         require(operator == msg.sender, "Only the current Operator can call setOperator.");
@@ -29,18 +29,18 @@ contract Reputation is IERC4974 {
         ///  @dev MUST throw if `operator` address is either already current `operator`
         ///  or is the zero address.
         require(_operator != operator, "Address is already the current operator.");
-        require(_operator != zeroAddress, "Operator cannot be the zero address.");
+        require(_operator != ZERO_ADDRESS, "Operator cannot be the zero address.");
 
         operator = _operator;
 
         emit Appointment(operator);
     }
 
-    function getOperator() view public returns(address) {
+    function getOperator() view external returns(address) {
         return operator;
     }
 
-    function setParticipation(address _participant, bool _participation) public {
+    function setParticipation(address _participant, bool _participation) external {
         /// @notice Activate or deactivate participation. CALLER IS RESPONSIBLE TO
         ///  UNDERSTAND THE TERMS OF THEIR PARTICIPATION.        
         /// @param _participant Address opting in or out of participation.
@@ -51,7 +51,7 @@ contract Reputation is IERC4974 {
         
         ///  MUST throw if `participant` is `operator` or zero address.
         require(_participant != operator, "Operator cannot be a participant.");
-        require(_participant != zeroAddress, "Operator cannot be the zero address.");
+        require(_participant != ZERO_ADDRESS, "Operator cannot be the zero address.");
 
         require(participants[_participant].isParticipating != _participation, "Contract call did not change participant status.");
 
@@ -61,7 +61,7 @@ contract Reputation is IERC4974 {
         emit Participation(_participant, _participation);
     }
 
-    function transfer(address _from, address _to, uint256 _amount) public {
+    function transfer(address _from, address _to, uint256 _amount) external {
         /// @notice Transfer EXP from one address to a participating address.
         /// @param _from Address from which to transfer EXP tokens.
         /// @param _to Address to which EXP tokens at `from` address will transfer.
@@ -76,7 +76,7 @@ contract Reputation is IERC4974 {
         require(_from != _to, "Cannot transfer to self.");
 
         ///  MUST throw unless `to` address is participating.
-        require(participants[_to].isParticipating == true, "Address is not a participant.");
+        require(participants[_to].isParticipating, "Address is not a participant."); // == true not required
 
         ///  MAY allow minting from zero address, burning to the zero address, 
         ///  transferring between accounts, and transferring between contracts.
@@ -87,15 +87,15 @@ contract Reputation is IERC4974 {
         emit Transfer(_from, _to, _amount);
     }
 
-    function getParticipantStatus(address _participant) view public returns(bool) {
+    function getParticipantStatus(address _participant) view external returns(bool) {
         return participants[_participant].isParticipating;
     }
 
-    function totalSupply() public view returns (uint256) {
+    function totalSupply() external view returns (uint256) {
         return totalTokens;
     }
 
-    function balanceOf(address _participant) public view returns (uint256) {
+    function balanceOf(address _participant) external view returns (uint256) {
         return participants[_participant].tokenBalance;
     }
 }
