@@ -6,12 +6,12 @@ import web3
 from web3.auto import w3
 from web3.middleware import construct_sign_and_send_raw_middleware
 
-# Contract address: 0x4F14BAC02d7d8a0219839EC36fd5158489aaEBA5
+# Polygon chainId = 137 
 
 def lambda_handler(event, context):
     wallet = event["walletAddress"]
-    account, provider = configure_web3_provider()
-    participant = check_participant_status(provider, account, wallet)
+    account, contract = configure_web3_provider()
+    participant = check_participant_status(account, contract, wallet)
     
     if participant == False:
         return {
@@ -40,24 +40,43 @@ def configure_web3_provider():
     account: LocalAccount = Account.from_key(private_key)
     w3.middleware_onion.add(construct_sign_and_send_raw_middleware(account))
 
-    #print(f"Your hot wallet address is {account.address}")
+    print(f"Your hot wallet address is {account.address}")
+    account = account.address
     
-    # Seems the next required piece here would be setting the actual contract object up using provider and account,
-    # then returning that object instead 
+    with open("abi.json") as f:
+        abi = json.load(f)
     
-    return account, provider
+    contract = w3.eth.contract(address='0x4F14BAC02d7d8a0219839EC36fd5158489aaEBA5', abi=abi)
+    
+    return account, contract
+    
+    
+def check_participant_status(_account, _contract, _receiving_wallet_address):
+    # Returns bool 
+    #if type(walletAddress) == 'str':
+    
+    transaction_parameters = {
+        'chainId': 137
+    }
+    
+    participant_status = _contract.caller({'from': _account}).getParticipantStatus(_receiving_wallet_address).build_transaction(transaction_parameters)
+    print(participant_status)
+    
+    return participant_status
+    
+    '''
 
 
-def send_tokens(_provider, _send_account, _receiving_wallet_address):
+web3.eth.send_transaction(contract_data)
+    '''
+
+
+def send_tokens(_account, _contract, _receiving_wallet_address):
     # Insert web3.py call to send tokens here
     # Returns transaction ID as string
     
     
     return "aowienfaosdnvasodnv"
 
-def check_participant_status(_provider, _send_account, _receiving_wallet_address):
-    # Insert web3.py call to contract here 
-    # Returns bool 
-    #if type(walletAddress) == 'str':
-    return True
+
     
