@@ -16,11 +16,12 @@ import { getPublications } from "../repositories/explore-publication";
 import { Publication, Post, ExplorePublicationResult, PublicationSortCriteria, PublicationTypes } from "../generated/types";
 import dayjs from 'dayjs';
 
+
 const Dashboard: NextPage = () => {
   const [publications, setPublications] = useState<Post[]>([]);
 
   useEffect(() => {
-    const hoge = async () => {
+    const fetch = async () => {
       const publication = await getPublications({
         sources: ["0xC5623EeFA1f097b47be8A5Da6f229A51B1c72D44"],
         sortCriteria: PublicationSortCriteria.TopCollected,
@@ -30,7 +31,7 @@ const Dashboard: NextPage = () => {
       console.log(publication!.items)
       setPublications(publication.items);
     };
-    hoge();
+    fetch();
   }, []);
 
   return (

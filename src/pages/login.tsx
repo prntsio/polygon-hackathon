@@ -8,30 +8,83 @@ import {
   Spacer,
   Text,
   VStack,
+  useToast,
 } from "@chakra-ui/react";
 import { AppContainer } from "src/components/appContainer";
-import { useAccount, useConnect, useDisconnect, useSignMessage } from "wagmi";
+import { useContractWrite, useContractRead, useConnect, useDisconnect, useSignMessage, useAccount } from "wagmi";
 import { InjectedConnector } from "wagmi/connectors/injected";
 import { login, generateChallenge } from "../repositories/login";
 import { getProfileByAddressRequest } from "../repositories/get-profiles";
+import { contractAddress } from "../repositories/constants";
+import abi from "../repositories/abi.json";
 
 const LoginPage: NextPage = () => {
-  const { isConnected } = useAccount();
+  const toast = useToast();
+  const {isConnected } = useAccount();
+  const [address, setAddress] = useState<string>();
   const { connect } = useConnect({
     connector: new InjectedConnector(),
     onSuccess(data) {
+      setAddress(data!.account)
       handleConnect(data!.account);
     },
   });
   const { disconnect } = useDisconnect();
   const { signMessageAsync } = useSignMessage();
 
-  async function handleConnect(address: string) {
+  const { data, isError, isLoading } = useContractRead({
+    addressOrName: contractAddress,
+    contractInterface: abi,
+    functionName: "getParticipantStatus",
+    args: [address],
+    onError(error) {
+      console.log("Error", error);
+    },
+    onSuccess(data) {
+      console.log("Success", data);
+    },
+  });
+
+  const {
+    write: setParticipation,
+  } = useContractWrite({
+    addressOrName: contractAddress,
+    contractInterface: abi,
+    functionName: "setParticipation",
+    args: [address, true],
+    onError(error) {
+      toast({
+        title: error.name,
+        description: error.message,
+        status: "error",
+        duration: 9000,
+        isClosable: true,
+      });
+    },
+    onSuccess(data) {
+      toast({
+        title: "Success",
+        description: "Your participation has been completed",
+        status: "success",
+        duration: 9000,
+        isClosable: true,
+      });
+      console.log("Success", data);
+    },
+  });
+
+
+  async function handleConnect(hoge: string) {
+    const isParticipation = data
     const challenge = await generateChallenge(address!);
     const signature = await signMessageAsync({
       message: challenge?.data?.challenge?.text,
     });
     login(address!, signature);
+
+    if (!isParticipation) {
+      setParticipation()
+    }
   }
 
   useEffect(() => {
